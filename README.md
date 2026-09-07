@@ -118,7 +118,7 @@ This project is provided for **educational and authorized security testing purpo
 - Surveilling third-party networks for tracking or intelligence purposes
 - Using beacon data to identify and target specific users or organizations
 - Any activity that violates applicable laws or regulations
-- Commercial use without proper licensing
+- Operating an intentional radiator outside FCC/regulatory limits
 
 ### No Warranty
 This software is provided "AS IS" without warranty of any kind. The author is not responsible for any misuse or damage caused by this software.
@@ -128,6 +128,34 @@ If you discover vulnerabilities using this tool, follow responsible disclosure p
 1. Report to the vendor/owner privately
 2. Allow reasonable time for remediation
 3. Do not exploit beyond proof of concept
+
+## Live Lab Test Plan
+
+This repo is a byte-level census + SAE handshake *engineering* tool: beacons and SAE
+auth commit/confirm frames are built/parsed offscreen — no capture, no radio.
+
+Offline (this repo, no radio):
+1. `python3 firmware/wpa3_survey.py --survey beacon --sae --json reports/w10.json` — classify
+   APs from the RSN IE in byte-level beacons, print the WPA3-adoption census and the SAE
+   commit/confirm byte sequence (exit 0).
+2. `python3 -m unittest discover -s tests` — byte-exact tests (RSN/AKM parsing, SAE frames) pass.
+
+Authorized lab (only with written scope + shield + authorized channel):
+3. Point a monitor at your lab AP and confirm the beacon's RSNIE AKM bits match what the
+   byte parser reports (PSK=0x0f/ac/02, SAE=0x0f/ac/08).
+4. `green = permitted`: any real-air run requires written lab authorization, a shielded bench,
+   and an authorized channel; never survey networks you don't own or lack scope for.
+
+## Metrics
+
+- Frame type engineered byte-exact: beacon with RSN IE (element 48) for PSK/SAE/PSK+SAE
+- RSN parser: AKM suite identifiers decoded straight off the IE (0x0F:AC:02 PSK, 0x0F:AC:08 SAE)
+- SAE handshake bytes: auth commit (alg 3, tx 1) + auth confirm (tx 2), STA and AP sides
+- Census: WPA2-Only / WPA3-Transition / WPA3-Only / Open + PMF capability, vendor OUI
+- Coverage: 8-AP record corpus (census) + 6 beacon-representable (RSN AKM)
+
+- Test suite: `python3 -m unittest discover -s tests`
+- Reports: `reports/` (gitignored)
 
 ## License
 

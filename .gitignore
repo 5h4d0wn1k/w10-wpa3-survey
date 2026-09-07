@@ -1,4 +1,16 @@
+# python cruft
 __pycache__/
 *.pyc
 *.pyo
+build/
+dist/
+.eggs/
+*.egg-info/
 .DS_Store
+
+# captures / artifacts -- never commit traffic or reports
+pcap/
+captures/
+*.pcap
+*.pcapng
+reports/
